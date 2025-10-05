@@ -1,5 +1,7 @@
 from datetime import datetime
 from io import BytesIO
+import json
+import os
 import discord
 from discord.ext import commands
 from matplotlib import pyplot as plt
@@ -7,9 +9,12 @@ import matplotlib.dates as mdates
 from helpers.fetch_btc import fetch_price
 import requests
 
+DATA_PATH = "data/channels.json"
+
 class BotCommands(commands.Cog):
         def __init__(self, bot):
             self.bot = bot
+
         
         @commands.command(name='converter', description='Converte um valor de BTC para USD/BRL', help='Converte um valor de BTC para USD/BRL')
         async def convert(self, ctx: commands.Context, amount: float):
@@ -95,5 +100,40 @@ class BotCommands(commands.Cog):
 
             await ctx.reply(embed=embed, file=file, ephemeral=True)
 
+        @commands.command(name='setcanal')
+        async def set_canal(self, ctx):
+            guild_id = str(ctx.guild.id)
+            channel_id = ctx.channel.id
+
+            self.save_channel_id(guild_id, channel_id)
+            await ctx.reply(f"Canal definido para alertas: {ctx.channel.mention}")
+
+        # metódos auxiliares para 'set_canal'
+        def save_channel_id(self, guild_id, channel_id):
+            #Salva o canal no JSON
+            if not os.path.exists(DATA_PATH):
+                os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
+                with open(DATA_PATH, "w") as f:
+                    json.dump({}, f)
+
+            with open(DATA_PATH, "r") as f:
+                data = json.load(f)
+
+            data[guild_id] = channel_id
+
+            with open(DATA_PATH, "w") as f:
+                json.dump(data, f, indent=4)
+
+        # metódos auxiliares para 'set_canal'
+        def get_channel_id(self, guild_id):
+            #Retorna o canal salvo no JSON
+            if not os.path.exists(DATA_PATH):
+                return None
+
+            with open(DATA_PATH, "r") as f:
+                data = json.load(f)
+
+            return data.get(str(guild_id))
+                        
 async def setup(bot):
     await bot.add_cog(BotCommands(bot))
