@@ -9,6 +9,7 @@ import matplotlib.dates as mdates
 from helpers.fetch_btc import fetch_price
 import requests
 
+
 DATA_PATH = "data/channels.json"
 
 class BotCommands(commands.Cog):
