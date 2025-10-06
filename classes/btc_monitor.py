@@ -73,7 +73,8 @@ class BTCMonitor(commands.Bot):
                         
                     await channel.send(embed=embed)
 
-                self.last_price = price
+            self.last_price = price
+            
         except Exception as e:
             # debug 
             print(f"Ocorreu um erro ao buscar, {e}")
